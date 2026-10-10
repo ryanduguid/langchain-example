@@ -1,18 +1,20 @@
 # LangChain + OpenAccountants
 
-Working examples of using [LangChain](https://github.com/langchain-ai/langchain) with the [OpenAccountants MCP server](https://www.openaccountants.com/api/mcp) — an open library of **800+ accountant-verified tax skills across 190+ jurisdictions**, signed off by named licensed accountants.
+Working examples of using [LangChain](https://github.com/langchain-ai/langchain) with the [OpenAccountants MCP server](https://www.openaccountants.com/api/mcp) to load tax Guides for an agent.
+
+Guides include accountant-reviewed versions and source-cited drafts. Check the [current catalogue](https://www.openaccountants.com/skills) and [review method](https://www.openaccountants.com/review-method) for each Guide's review status, reviewer, version and review date. Authorship or a jurisdiction lead's name does not establish professional review of every Guide version.
 
 ## Why
 
-When your LangChain agent needs to compute Malta VAT, classify German bookkeeping transactions, or walk a user through a US Schedule C, **it should call accountant-built skills, not hallucinate**. OpenAccountants is the open library that supplies those skills, every one signed by a named CPA / EA / Steuerberater / Chartered Accountant.
+When your LangChain agent needs tax rules, it can load a jurisdiction-specific Guide and cite its sources. Professional review varies by Guide and version; preserve that distinction in the agent's answer.
 
 | | Without OpenAccountants | With OpenAccountants |
 |---|---|---|
-| Tax computation | LLM guess from training data | Skill from the accountant who actually files this regularly |
-| Auditability | None — model output is opaque | Every skill has a verifier name + Calendly link + version |
-| Jurisdictional coverage | "I think Malta uses…" | 190+ countries / US states with deep packs |
+| Tax computation | LLM guess from training data | Guide with sources and published review status |
+| Auditability | None; model output is opaque | Check each Guide's sources, version and review record |
+| Jurisdictional coverage | "I think Malta uses…" | See the [current catalogue](https://www.openaccountants.com/skills) for available Guides |
 | Updates | Whenever training data refreshes | Annual rates JSON refreshed every December |
-| Source code | N/A | [github.com/openaccountants/openaccountants](https://github.com/openaccountants/openaccountants) (AGPL-3.0) |
+| Source code | N/A | [Source repository](https://github.com/openaccountants/openaccountants); [mixed licensing](https://github.com/openaccountants/openaccountants/blob/main/LICENSING.md) |
 
 ## Install
 
@@ -47,7 +49,7 @@ async def main():
 asyncio.run(main())
 ```
 
-The agent calls `start({intent: 'VAT', jurisdiction: 'MT'})` to scope, then `get_skill({slug: 'malta-vat-return'})` to load the rules signed by Michael Cutajar, CPA (Malta), and walks the user through Article 10 vs Article 11, the EUR 35,000 threshold, EU reverse charge, and the Calendly handoff for review.
+The agent calls `start({intent: 'VAT', jurisdiction: 'MT'})` to scope, then `get_skill({slug: 'malta-vat-return'})` to load the Guide. Check its current review record before explaining Article 10 vs Article 11, the EUR 35,000 threshold, EU reverse charge and the handoff for review.
 
 ## What's in this repo
 
@@ -62,7 +64,7 @@ The agent calls `start({intent: 'VAT', jurisdiction: 'MT'})` to scope, then `get
 |---|---|
 | `start` | **Front door.** Pass `intent` (free text, e.g. `"taxes"`, `"VAT return"`, `"set up a company"`) + `jurisdiction` (ISO code) → returns a ready-to-execute plan listing the skills to load. Call this FIRST. |
 | `list_skills` | List published skills filtered by jurisdiction / category. |
-| `get_skill` | Fetch a single skill's full markdown including the provenance footer (verifier name, Calendly link, audit-flash-point markers). |
+| `get_skill` | Fetch a single skill's full markdown including its provenance footer. Inspect the review status before attributing professional review. |
 | `get_skill_sections` | Same content split into headed sections — useful for very large skills (e.g. NY IT-201). |
 | `search_skills` | Keyword search across published skill content. |
 
@@ -78,14 +80,14 @@ Every other UN member state has at least foundational coverage.
 
 These skills produce **working papers, not filed returns**. Every output preserves a "Talk to a verified accountant" footer with a Calendly link. No client–accountant relationship is created by reading or applying these skills — that requires a formal engagement letter signed by both you and a verified accountant.
 
-## License
+## Licence
 
-This examples repo is **MIT-licensed**. The underlying skill content fetched from the MCP server is **AGPL-3.0 with attribution** per [openaccountants/openaccountants](https://github.com/openaccountants/openaccountants/blob/main/LICENSE-ADDITIONAL.md). Commercial licensing available via `info@openaccountants.com`.
+MIT for this repository. Guide content has separate terms from this wrapper. The source repository's [licensing document](https://github.com/openaccountants/openaccountants/blob/main/LICENSING.md) describes the source-available OA Guide License, commercial options, third-party copyleft exceptions and prior AGPL releases. Check the terms for the Guide version you use.
 
 ## Links
 
 - **Website**: [openaccountants.com](https://www.openaccountants.com)
-- **Skills source** (AGPL): [github.com/openaccountants/openaccountants](https://github.com/openaccountants/openaccountants)
+- **Guide source**: [github.com/openaccountants/openaccountants](https://github.com/openaccountants/openaccountants)
 - **MCP server**: `https://www.openaccountants.com/api/mcp`
 - **Verified accountant network**: [openaccountants.com/network](https://www.openaccountants.com/network)
 - **Book a verified accountant**: [calendly.com/openaccountants-info/30min](https://calendly.com/openaccountants-info/30min)
